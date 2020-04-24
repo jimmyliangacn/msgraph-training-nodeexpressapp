@@ -1,13 +1,9 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 var express = require('express');
 var router = express.Router();
 var tokens = require('../tokens.js');
 var graph = require('../graph.js');
 
 /* GET /calendar */
-// <GetRouteSnippet>
 router.get('/',
   async function(req, res) {
     if (!req.isAuthenticated()) {
@@ -28,7 +24,23 @@ router.get('/',
           debug: JSON.stringify(err)
         });
       }
-
+	  
+	  
+      if (accessToken && accessToken.length > 0) {
+        try {
+          // Get the presence
+          var presence = await graph.getPresence(accessToken);
+		  //console.log(presence);
+          params.presence = presence;
+        } catch (err) {
+          req.flash('error_msg', {
+            message: 'Could not fetch presence',
+            debug: JSON.stringify(err)
+          });
+        }
+      }
+	  
+	  
       if (accessToken && accessToken.length > 0) {
         try {
           // Get the events
@@ -40,14 +52,13 @@ router.get('/',
             debug: JSON.stringify(err)
           });
         }
-      } else {
-        req.flash('error_msg', 'Could not get an access token');
       }
 
+	  console.log("here are the params");
+	  console.log(params);
       res.render('calendar', params);
     }
   }
 );
-// </GetRouteSnippet>
 
 module.exports = router;

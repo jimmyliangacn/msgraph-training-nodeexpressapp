@@ -1,7 +1,5 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 var graph = require('@microsoft/microsoft-graph-client');
+//var graphbeta = require('@microsoft/microsoft-graph-types-beta');
 require('isomorphic-fetch');
 
 module.exports = {
@@ -11,20 +9,30 @@ module.exports = {
     const user = await client.api('/me').get();
     return user;
   },
+  
+   getEvents: async function(accessToken) {
+	  const client = getAuthenticatedClient(accessToken);
 
-  // <GetEventsSnippet>
-  getEvents: async function(accessToken) {
-    const client = getAuthenticatedClient(accessToken);
+	  const events = await client
+		.api('/me/events')
+		.select('subject,organizer,start,end')
+		.orderby('createdDateTime DESC')
+		.get();
 
-    const events = await client
-      .api('/me/events')
-      .select('subject,organizer,start,end')
-      .orderby('createdDateTime DESC')
-      .get();
+	  return events;
+	},
+	
+	getPresence: async function(accessToken) {
+	  const client = getAuthenticatedClient(accessToken);
 
-    return events;
-  }
-  // </GetEventsSnippet>
+	  const presence = await client
+		.api('/me/presence')
+		.version('beta')
+		.get();
+      console.log(presence)
+	  return presence;
+	}
+
 };
 
 function getAuthenticatedClient(accessToken) {
@@ -39,3 +47,4 @@ function getAuthenticatedClient(accessToken) {
 
   return client;
 }
+
